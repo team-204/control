@@ -1,0 +1,47 @@
+{
+    "_meta": {
+        "hash": {
+            "sha256": "ac48b7240d371fe5a93109017e537b7440c9995b96576bbb31107648d287db72"
+        },
+        "host-environment-markers": {
+            "implementation_name": "cpython",
+            "implementation_version": "0",
+            "os_name": "posix",
+            "platform_machine": "x86_64",
+            "platform_python_implementation": "CPython",
+            "platform_release": "4.15.5-1-ARCH",
+            "platform_system": "Linux",
+            "platform_version": "#1 SMP PREEMPT Thu Feb 22 22:15:20 UTC 2018",
+            "python_full_version": "2.7.14",
+            "python_version": "2.7",
+            "sys_platform": "linux2"
+        },
+        "pipfile-spec": 6,
+        "requires": {
+            "python_version": "2.7"
+        },
+        "sources": [
+            {
+                "name": "pypi",
+                "url": "https://pypi.python.org/simple",
+                "verify_ssl": true
+            }
+        ]
+    },
+    "default": {
+        "pynmea2": {
+            "hashes": [
+                "sha256:f1509fe9a424f2ff0547a0b8475f807a587e3482eb6aed6b873c3df590edbca0"
+            ],
+            "version": "==1.12.0"
+        },
+        "pyserial": {
+            "hashes": [
+                "sha256:e0770fadba80c31013896c7e6ef703f72e7834965954a78e71a3049488d4d7d8",
+                "sha256:6e2d401fdee0eab996cf734e67773a0143b932772ca8b42451440cfed942c627"
+            ],
+            "version": "==3.4"
+        }
+    },
+    "develop": {}
+}
