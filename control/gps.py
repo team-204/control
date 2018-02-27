@@ -1,3 +1,4 @@
+"""Defines classes used to read and handle GPS data"""
 import pynmea2
 import serial
 
@@ -10,11 +11,21 @@ class GpsReading:
         self.time = time
         self.altitude = altitude
 
+    def __repr__(self):
+        """Returns representation of GPS reading"""
+        return '{}({}, {}, {}, {})'.format(self.__class__.__name__,
+                                           self.latitude, self.longitude,
+                                           self.time, self.altitude)
+
 
 class Gps:
     """A class for gathering GPS data via serial"""
     def __init__(self, port, baudrate):
         self.ser = serial.Serial(port, baudrate)
+
+    def __repr__(self):
+        """Returns representation of GPS"""
+        return '{}({})'.format(self.__class__.__name__, self.ser)
 
     def read(self):
         """Returns a GpsReading object with the values supplied"""
