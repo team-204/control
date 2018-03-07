@@ -51,8 +51,8 @@ class GPStest(unittest.TestCase):
 
     def test_gps_satellite_no_lock_msg(self):
         """Test reading a nmea message with no satellite lock."""
-        msg_return_list = [NMEA_MSG_RMC, NMEA_MSG_GSV, NMEA_MSG_GGA2]
+        msg_return_list = [NMEA_MSG_RMC, NMEA_MSG_NOLOCK, NMEA_MSG_GGA]
         self.mock_serial_connect.readline.side_effect = msg_return_list
-        expected_reading = expected_gps_reading(NMEA_MSG_GGA2)
+        expected_reading = expected_gps_reading(NMEA_MSG_NOLOCK)
         actual_reading = self.gps.read()
         self.assertEqual(actual_reading, expected_reading)
