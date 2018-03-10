@@ -1,0 +1,12 @@
+language: python
+python:
+  - "2.7"
+
+# command to install dependencies
+install:
+  - pip install pipenv
+  - make init
+
+# command to run tests
+script:
+  - make test
