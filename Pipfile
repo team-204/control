@@ -8,6 +8,7 @@ name = "pypi"
 [dev-packages]
 
 mock = "*"
+dronekit-sitl = "*"
 
 
 [packages]
@@ -15,6 +16,7 @@ mock = "*"
 pyserial = "*"
 "pynmea2" = "*"
 pyzmq = "*"
+dronekit = "*"
 
 
 [requires]

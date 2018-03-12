@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "eb1e7976c2f86edcc196c9b00c20d4d6cc78245c73df1551300b9a6aa10ea25d"
+            "sha256": "9518e681f41df36ce2cc88f4b93afb06d2b1edea70ca1d8321d5204c5f596867"
         },
         "host-environment-markers": {
             "implementation_name": "cpython",
@@ -29,6 +29,33 @@
         ]
     },
     "default": {
+        "dronekit": {
+            "hashes": [
+                "sha256:d8f0d67516940349983ceb73d84e2be19b41ed4e276d3a464b53f1c07e617699",
+                "sha256:91c19b4559ae536f2020c4e77bb16ac977a7ca7a6e43b7392acef6061cebf578",
+                "sha256:8bc3796a10049fd1a832bab15c092f04cd843ce0013a85a0b188d9b6ce3f734e"
+            ],
+            "version": "==2.9.1"
+        },
+        "future": {
+            "hashes": [
+                "sha256:3d3b193f20ca62ba7d8782589922878820d0a023b885882deec830adbf639b97"
+            ],
+            "version": "==0.15.2"
+        },
+        "monotonic": {
+            "hashes": [
+                "sha256:668088baea217e1e89edecd12c9a913ab4678419ad4eca378dcef1e4059a44f3",
+                "sha256:c0e1ceca563ca6bb30b0fb047ee1002503ae6ad3585fc9c6af37a8f77ec274ba"
+            ],
+            "version": "==1.2"
+        },
+        "pymavlink": {
+            "hashes": [
+                "sha256:7c22f316e2282f1dff9f0312d819c5f6bcb565141a8c0f7b741e31c242037379"
+            ],
+            "version": "==2.0.6"
+        },
         "pynmea2": {
             "hashes": [
                 "sha256:f1509fe9a424f2ff0547a0b8475f807a587e3482eb6aed6b873c3df590edbca0"
@@ -72,6 +99,20 @@
         }
     },
     "develop": {
+        "dronekit": {
+            "hashes": [
+                "sha256:d8f0d67516940349983ceb73d84e2be19b41ed4e276d3a464b53f1c07e617699",
+                "sha256:91c19b4559ae536f2020c4e77bb16ac977a7ca7a6e43b7392acef6061cebf578",
+                "sha256:8bc3796a10049fd1a832bab15c092f04cd843ce0013a85a0b188d9b6ce3f734e"
+            ],
+            "version": "==2.9.1"
+        },
+        "dronekit-sitl": {
+            "hashes": [
+                "sha256:347da29250c0cec2d66055cb9cf7b892bd16293d844feb38845203b42f2b572a"
+            ],
+            "version": "==3.2.0"
+        },
         "funcsigs": {
             "hashes": [
                 "sha256:330cc27ccbf7f1e992e69fef78261dc7c6569012cf397db8d3de0234e6c937ca",
@@ -80,6 +121,12 @@
             "markers": "python_version < '3.3'",
             "version": "==1.0.2"
         },
+        "future": {
+            "hashes": [
+                "sha256:3d3b193f20ca62ba7d8782589922878820d0a023b885882deec830adbf639b97"
+            ],
+            "version": "==0.15.2"
+        },
         "mock": {
             "hashes": [
                 "sha256:5ce3c71c5545b472da17b72268978914d0252980348636840bd34a00b5cc96c1",
@@ -87,12 +134,39 @@
             ],
             "version": "==2.0.0"
         },
+        "monotonic": {
+            "hashes": [
+                "sha256:668088baea217e1e89edecd12c9a913ab4678419ad4eca378dcef1e4059a44f3",
+                "sha256:c0e1ceca563ca6bb30b0fb047ee1002503ae6ad3585fc9c6af37a8f77ec274ba"
+            ],
+            "version": "==1.2"
+        },
         "pbr": {
             "hashes": [
                 "sha256:60c25b7dfd054ef9bb0ae327af949dd4676aa09ac3a9471cdc871d8a9213f9ac",
                 "sha256:05f61c71aaefc02d8e37c0a3eeb9815ff526ea28b3b76324769e6158d7f95be1"
             ],
             "version": "==3.1.1"
+        },
+        "psutil": {
+            "hashes": [
+                "sha256:82a06785db8eeb637b349006cc28a92e40cd190fefae9875246d18d0de7ccac8",
+                "sha256:4152ae231709e3e8b80e26b6da20dc965a1a589959c48af1ed024eca6473f60d",
+                "sha256:230eeb3aeb077814f3a2cd036ddb6e0f571960d327298cc914c02385c3e02a63",
+                "sha256:a3286556d4d2f341108db65d8e20d0cd3fcb9a91741cb5eb496832d7daf2a97c",
+                "sha256:94d4e63189f2593960e73acaaf96be235dd8a455fe2bcb37d8ad6f0e87f61556",
+                "sha256:c91eee73eea00df5e62c741b380b7e5b6fdd553891bee5669817a3a38d036f13",
+                "sha256:779ec7e7621758ca11a8d99a1064996454b3570154277cc21342a01148a49c28",
+                "sha256:8a15d773203a1277e57b1d11a7ccdf70804744ef4a9518a87ab8436995c31a4b",
+                "sha256:e2467e9312c2fa191687b89ff4bc2ad8843be4af6fb4dc95a7cc5f7d7a327b18"
+            ],
+            "version": "==5.4.3"
+        },
+        "pymavlink": {
+            "hashes": [
+                "sha256:7c22f316e2282f1dff9f0312d819c5f6bcb565141a8c0f7b741e31c242037379"
+            ],
+            "version": "==2.0.6"
         },
         "six": {
             "hashes": [
