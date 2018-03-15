@@ -1,8 +1,5 @@
 """Reads 10 gps outputs from the serial connection"""
-import os
 import pprint
-import sys
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 import control.gps
 
 

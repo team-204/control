@@ -1,10 +1,7 @@
 """Tests the gps module."""
-import os
-import pynmea2
-import sys
 import unittest
 from mock import patch
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+import pynmea2
 import control.gps
 
 # mock gps nmea 0183 messages

@@ -1,13 +1,9 @@
-"""Tests the controller module."""
-import os
-import sys
+"""Tests the controller module using the simulator."""
 import unittest
 import dronekit_sitl
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 import control.controller
 
 
-# TODO: setup() sitl, test arm() function
 class ControllerTest(unittest.TestCase):
     """Tests the controller in charge of the drone itself."""
     def setUp(self):

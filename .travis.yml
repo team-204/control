@@ -4,9 +4,10 @@ python:
 
 # command to install dependencies
 install:
-  - pip install pipenv
+  - pip install pipenv flake8
   - make init
 
 # command to run tests
 script:
-  - make test
+  - make test-all
+  - flake8 --max-line-length=99 .
