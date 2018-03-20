@@ -34,7 +34,7 @@ class GpsReading:
 class Gps:
     """A class for gathering GPS data via serial"""
     def __init__(self, port, baudrate):
-        self.ser = serial.Serial(port, baudrate)
+        self.ser = serial.Serial(port, baudrate, timeout=1)
 
     def __repr__(self):
         """Returns representation of GPS"""
@@ -44,7 +44,6 @@ class Gps:
         """Returns a GpsReading object with the values supplied"""
         msg = None
         tries = 4
-        # TODO: Add timeout for reads using signal library
         for attempt in range(1, tries + 1):
             try:
                 while not isinstance(msg, pynmea2.GGA):
