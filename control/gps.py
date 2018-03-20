@@ -3,6 +3,12 @@ import pynmea2
 import serial
 
 
+class GpsReadError(Exception):
+    """Error for invalid gps reading"""
+    def __init__(self, message, data):
+        super(GpsReadError, self).__init__((message, data))
+
+
 class GpsReading:
     """A data class for GPS reading attributes"""
     def __init__(self, latitude, longitude, altitude, time):
@@ -37,9 +43,18 @@ class Gps:
     def read(self):
         """Returns a GpsReading object with the values supplied"""
         msg = None
-        # TODO: Add try except chain to catch any dirty GPS output exceptions
+        tries = 4
         # TODO: Add timeout for reads using signal library
-        while not isinstance(msg, pynmea2.GGA):
-            msg = pynmea2.parse(self.ser.readline())
+        for attempt in range(1, tries + 1):
+            try:
+                while not isinstance(msg, pynmea2.GGA):
+                    msg = pynmea2.parse(self.ser.readline())
+            except pynmea2.ParseError:
+                if attempt == tries:
+                    raise GpsReadError('max number of parse attempts reached', attempt)
+                else:
+                    pass
+            else:
+                break
         return GpsReading(msg.latitude, msg.longitude, msg.altitude,
                           msg.timestamp)

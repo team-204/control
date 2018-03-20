@@ -2,6 +2,7 @@
 import unittest
 from mock import patch
 import pynmea2
+import pytest
 import control.gps
 
 # mock gps nmea 0183 messages
@@ -53,3 +54,28 @@ class GPStest(unittest.TestCase):
         expected_reading = expected_gps_reading(NMEA_MSG_NOLOCK)
         actual_reading = self.gps.read()
         self.assertEqual(actual_reading, expected_reading)
+
+    def test_gps_corrupt_msg(self):
+        """Test reading a corrupt nmea message."""
+        msg_return_list = [NMEA_MSG_CORRUPT, NMEA_MSG_CORRUPT, NMEA_MSG_CORRUPT, NMEA_MSG_GGA]
+        self.mock_serial_connect.readline.side_effect = msg_return_list
+        expected_reading = expected_gps_reading(NMEA_MSG_GGA)
+        actual_reading = self.gps.read()
+        self.assertEqual(actual_reading, expected_reading)
+
+    def test_gps_corrupt_msg2(self):
+        """Test reading a corrupt nmea message mixed with other valid messages."""
+        msg_return_list = [NMEA_MSG_CORRUPT, NMEA_MSG_GSV,
+                           NMEA_MSG_RMC, NMEA_MSG_GGA, NMEA_MSG_CORRUPT]
+        self.mock_serial_connect.readline.side_effect = msg_return_list
+        expected_reading = expected_gps_reading(NMEA_MSG_GGA)
+        actual_reading = self.gps.read()
+        self.assertEqual(actual_reading, expected_reading)
+
+    def test_gps_corrupt_msg3(self):
+        """Test reading max number of corrupt nmea messages."""
+        with pytest.raises(control.gps.GpsReadError):
+            msg_return_list = [NMEA_MSG_CORRUPT, NMEA_MSG_CORRUPT,
+                               NMEA_MSG_CORRUPT, NMEA_MSG_CORRUPT, NMEA_MSG_GGA]
+            self.mock_serial_connect.readline.side_effect = msg_return_list
+            self.gps.read()
