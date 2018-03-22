@@ -1,6 +1,29 @@
 """Defines classes used to read and handle GPS data"""
+import math
 import pynmea2
 import serial
+
+
+def get_location_offset(origin, x_offset, y_offset):
+    """
+    Returns a GpsReading with calculated GPS latitude and longitude coordinates given a
+    x and y offset in meters from original GPS coordinates. It keeps the same altitude as
+    original GpsReading and passes in a null timestamp.
+    Sources:
+    https://github.com/dronekit/dronekit-python/blob/master/examples/mission_basic/mission_basic.py
+    http://gis.stackexchange.com/questions/2951/algorithm-for-offsetting-a-latitude-longitude-by-some-amount-of-meters
+    """
+
+    earth_radius = 6378137.0  # Radius of "spherical" earth
+
+    # Offsets coordinates in radians
+    lat_offset = x_offset / earth_radius
+    lon_offset = y_offset / (earth_radius*math.cos(math.pi*origin.latitude/180))
+
+    # New position in decimal degrees
+    new_lat = origin.latitude + (lat_offset * 180/math.pi)
+    new_lon = origin.longitude + (lon_offset * 180/math.pi)
+    return GpsReading(new_lat, new_lon, origin.altitude, 0)
 
 
 class GpsReadError(Exception):
