@@ -66,13 +66,13 @@ class Gps:
     def read(self):
         """Returns a GpsReading object with the values supplied"""
         msg = None
-        tries = 4
-        for attempt in range(1, tries + 1):
+        max_tries = 4
+        for attempt in range(1, max_tries + 1):
             try:
                 while not isinstance(msg, pynmea2.GGA):
                     msg = pynmea2.parse(self.ser.readline())
             except pynmea2.ParseError:
-                if attempt == tries:
+                if attempt == max_tries:
                     raise GpsReadError('max number of parse attempts reached', attempt)
                 else:
                     pass
