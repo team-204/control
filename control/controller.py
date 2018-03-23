@@ -21,13 +21,16 @@ class Controller:
         self.vehicle = None
         if baud:
             self.vehicle = dronekit.connect(self.connection_string,
-                                            wait_ready=True, baud=57600)
+                                            wait_ready=True, baud=baud)
         else:
             self.vehicle = dronekit.connect(self.connection_string,
                                             wait_ready=True)
 
     def arm(self):
         """Sets the mode to guided and arms the copter for flight."""
+        while not self.vehicle.is_armable:
+            print("Waiting for vehicle to initialise...")
+            time.sleep(1)
         # Arm the copter
         self.vehicle.mode = dronekit.VehicleMode("GUIDED")
         while not self.vehicle.armed:
