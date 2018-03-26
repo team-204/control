@@ -4,26 +4,43 @@ import pynmea2
 import serial
 
 
-def get_location_offset(origin, x_offset, y_offset):
+def get_location_offset(origin, north_offset, east_offset):
     """
     Returns a GpsReading with calculated GPS latitude and longitude coordinates given a
-    x and y offset in meters from original GPS coordinates. It keeps the same altitude as
-    original GpsReading and passes in a null timestamp.
+    north and east offset in meters from original GPS coordinates. Note that
+    an x offset corresponds to an east offset and a y offset corresponds to a north offset.
+    For the new reading, the same altitude as the original GpsReading is kept and
+    a null timestamp is used.
+
     Sources:
     https://github.com/dronekit/dronekit-python/blob/master/examples/mission_basic/mission_basic.py
     http://gis.stackexchange.com/questions/2951/algorithm-for-offsetting-a-latitude-longitude-by-some-amount-of-meters
     """
 
-    earth_radius = 6378137.0  # Radius of "spherical" earth
+    earth_radius = 6371001.0  # Average radius of spherical earth in meters
 
     # Offsets coordinates in radians
-    lat_offset = x_offset / earth_radius
-    lon_offset = y_offset / (earth_radius*math.cos(math.pi*origin.latitude/180))
+    lat_offset = north_offset / earth_radius
+    lon_offset = east_offset / (earth_radius*math.cos(math.pi*origin.latitude/180))
 
     # New position in decimal degrees
     new_lat = origin.latitude + (lat_offset * 180/math.pi)
     new_lon = origin.longitude + (lon_offset * 180/math.pi)
     return GpsReading(new_lat, new_lon, origin.altitude, 0)
+
+
+def get_distance(reading_1, reading_2):
+    """
+    Returns distance in meters between two GpsReadings.
+    The latitude is fairly accurate in this calculation
+    but the longitude is off.
+
+    Source:
+    https://github.com/dronekit/dronekit-python/blob/master/examples/mission_basic/mission_basic.py
+    """
+    lat_diff = reading_1.latitude - reading_2.latitude
+    lon_diff = reading_1.longitude - reading_2.longitude
+    return math.sqrt((lat_diff*lat_diff) + (lon_diff*lon_diff)) * 1.113195e5
 
 
 class GpsReadError(Exception):
@@ -44,7 +61,7 @@ class GpsReading:
         """Returns representation of GPS reading"""
         return '{}({}, {}, {}, {})'.format(self.__class__.__name__,
                                            self.latitude, self.longitude,
-                                           self.time, self.altitude)
+                                           self.altitude, self.time)
 
     def __eq__(self, other):
         """Compares if two GpsReadings are equal"""
