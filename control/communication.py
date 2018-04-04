@@ -5,8 +5,8 @@ import serial
 
 class Communication:
     """Class abstracting communication using the Xbee via serial."""
-    def __init__(self, port):
-        self.ser = serial.Serial(port)
+    def __init__(self, port, time_out):
+        self.ser = serial.Serial(port, timeout=time_out)
 
     def send(self, data):
         """Send data via the communication module.
@@ -17,8 +17,10 @@ class Communication:
         :param data: The data to send (must be able to be jsonned).
 
         """
+        # json data given by user and string encode it
         jsoned = json.dumps(data)
         byte_data = str.encode(jsoned)
+        # send data
         self.ser.write(byte_data)
         self.ser.write(b'\n')
 
@@ -29,11 +31,19 @@ class Communication:
         type of data returned should be the same as the type that was sent by
         the other device.
 
-        :returns: original data -- This data has the type that was sent. It is
+        :returns:
+        None -- if the time_out time is exceeded
+
+        original data -- This data has the type that was sent. It is
                                    up to the user to determine the type and use
                                    it accordingly.
 
         """
         jsoned_data = self.ser.readline()
-        unjsoned_data = json.loads(jsoned_data)
-        return unjsoned_data
+        if not jsoned_data:
+            return None
+        try:
+            unjsoned_data = json.loads(jsoned_data)
+            return unjsoned_data
+        except ValueError:
+            return None
