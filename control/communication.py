@@ -1,4 +1,5 @@
 """Abstracts communication using the Xbee."""
+import logging
 import json
 import serial
 
@@ -6,6 +7,7 @@ import serial
 class Communication:
     """Class abstracting communication using the Xbee via serial."""
     def __init__(self, port, time_out):
+        self.logger = logging.getLogger(__name__)
         self.ser = serial.Serial(port, timeout=time_out)
 
     def send(self, data):
@@ -45,5 +47,7 @@ class Communication:
         try:
             unjsoned_data = json.loads(jsoned_data)
             return unjsoned_data
-        except ValueError:
+        except ValueError as err:
+            self.logger.warn('ValueError: {}'.format(err))
+            self.logger.warn('received: {}'.format(jsoned_data))
             return None
