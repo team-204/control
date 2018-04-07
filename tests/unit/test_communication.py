@@ -27,6 +27,18 @@ def test_receiving_no_data(mock_serial_class):
 
 
 @patch('serial.Serial')
+def test_receiving_bad_data(mock_serial_class):
+    """Confirm that None is returned when json data is corrupt."""
+    corrupt = '{"some_key": 777'
+    expected = None
+    serial_mock = mock_serial_class.return_value
+    serial_mock.readline.return_value = corrupt
+    comm = control.communication.Communication('port', 2)
+    actual = comm.receive()
+    assert actual == expected
+
+
+@patch('serial.Serial')
 def test_sending_valid_data(mock_serial_class):
     """Confirm the jsonned data is passed to pyserial correctly."""
     serial_mock = mock_serial_class.return_value

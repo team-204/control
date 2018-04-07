@@ -12,5 +12,8 @@ test-all:
 init:
 	pipenv install --dev
 
+lint:
+	flake8 --max-line-length=99 .
+
 clean:
 	rm -rf control.egg-info .pytest_cache */*.pyc */__pycache__
