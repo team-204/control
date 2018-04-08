@@ -24,13 +24,13 @@ class Controller:
         self.connection_string = connection_string
         self.vehicle = None
         if baud:
-            self.logger.debug('Attempting connection to %s',
-                              connection_string)
+            self.logger.debug('Attempting connection to %s at baud %s',
+                              connection_string, baud)
             self.vehicle = dronekit.connect(self.connection_string,
                                             wait_ready=True, baud=baud)
         else:
-            self.logger.debug('Attempting connection to %s at baud %s',
-                              connection_string, baud)
+            self.logger.debug('Attempting connection to %s',
+                              connection_string)
             self.vehicle = dronekit.connect(self.connection_string,
                                             wait_ready=True)
         self.logger.debug('Connected.')
