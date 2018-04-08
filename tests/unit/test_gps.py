@@ -79,3 +79,19 @@ class GPStest(unittest.TestCase):
                                NMEA_MSG_CORRUPT, NMEA_MSG_CORRUPT, NMEA_MSG_GGA]
             self.mock_serial_connect.readline.side_effect = msg_return_list
             self.gps.read()
+
+
+def test_offset_and_locations_are_inverse_functions():
+    """Tests that get_location_offset and get_relative_from_location are
+    inverse functions.
+    """
+    origin = control.gps.GpsReading(33.142220, -87.582491, 0, 0)
+    offset = control.gps.get_location_offset(origin, 10, 15)
+    tup = control.gps.get_relative_from_location(origin, offset)
+    assert tup[0] - 15 < 1
+    assert tup[1] - 10 < 1
+
+    offset = control.gps.get_location_offset(origin, -7, -15)
+    tup = control.gps.get_relative_from_location(origin, offset)
+    assert tup[0] + 15 < 1
+    assert tup[1] + 7 < 1

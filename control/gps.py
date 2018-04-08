@@ -4,6 +4,9 @@ import pynmea2
 import serial
 
 
+EARTH_RADIUS = 6371001.0  # Average radius of spherical earth in meters
+
+
 def get_location_offset(origin, north_offset, east_offset):
     """
     Returns a GpsReading with calculated GPS latitude and longitude coordinates given a
@@ -17,16 +20,27 @@ def get_location_offset(origin, north_offset, east_offset):
     http://gis.stackexchange.com/questions/2951/algorithm-for-offsetting-a-latitude-longitude-by-some-amount-of-meters
     """
 
-    earth_radius = 6371001.0  # Average radius of spherical earth in meters
-
     # Offsets coordinates in radians
-    lat_offset = north_offset / earth_radius
-    lon_offset = east_offset / (earth_radius*math.cos(math.pi*origin.latitude/180))
+    lat_offset = north_offset / EARTH_RADIUS
+    lon_offset = east_offset / (EARTH_RADIUS*math.cos(math.pi*origin.latitude/180))
 
     # New position in decimal degrees
     new_lat = origin.latitude + (lat_offset * 180/math.pi)
     new_lon = origin.longitude + (lon_offset * 180/math.pi)
     return GpsReading(new_lat, new_lon, origin.altitude, 0)
+
+
+def get_relative_from_location(origin, point):
+    """
+    Returns the relative (x, y) values in meters of the GpsReading point based
+    on the origin GpsReading (which is considered (0,0)). The inverse of
+    get_location_offset.
+    """
+    lon_offset = (point.longitude - origin.longitude) * (math.pi / 180)
+    lat_offset = (point.latitude - origin.latitude) * (math.pi / 180)
+    x = lon_offset * (EARTH_RADIUS*math.cos(math.pi*origin.latitude/180))
+    y = lat_offset * EARTH_RADIUS
+    return (x, y)
 
 
 def get_distance(reading_1, reading_2):
