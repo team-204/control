@@ -13,7 +13,7 @@ from helper import location_global_relative_to_gps_reading
 
 class Controller:
     """This class acts as a wrapper for dronekit and controls the vehicle."""
-    def __init__(self, connection_string, baud=None):
+    def __init__(self, connection_string, baud=None, com=None):
         """Open a connection to the vehicle.
 
         Args:
@@ -23,6 +23,7 @@ class Controller:
         self.logger = logging.getLogger(__name__)
         self.connection_string = connection_string
         self.vehicle = None
+        self.__com = com
         if baud:
             self.logger.debug('Attempting connection to %s at baud %s',
                               connection_string, baud)
@@ -38,6 +39,8 @@ class Controller:
         def _vehicle_state_callback(vehicle, attribute, value):
             """Logs vehicle state changes."""
             self.logger.debug("Attribute {}: {}".format(attribute, value))
+            if self.__com:
+                self.__com.send(u"Attribute {}: {}".format(attribute, value))
         self.vehicle.add_attribute_listener('armed',
                                             _vehicle_state_callback)
         self.vehicle.add_attribute_listener('mode',
@@ -48,11 +51,15 @@ class Controller:
         """Sets the mode to guided and arms the copter for flight."""
         while not self.vehicle.is_armable:
             self.logger.debug('Waiting for vehicle to initialise...')
+            if self.__com:
+                self.__com.send(u"Waiting for vehicle to initialise...")
             time.sleep(5)
         # Arm the copter
         self.vehicle.mode = dronekit.VehicleMode("GUIDED")
         while not self.vehicle.armed:
             self.logger.debug('Trying to arm...')
+            if self.__com:
+                self.__com.send(u"Trying to arm...")
             self.vehicle.armed = True
             time.sleep(1)
         self.home = self.vehicle.location.global_relative_frame
@@ -63,8 +70,9 @@ class Controller:
         has been cancelled by the user.
         """
         self.logger.debug("Attempting simple takeoff to {} m...".format(target_altitude))
+        if self.__com:
+            self.__com.send(u"Attempting simple takeoff to {} m...".format(target_altitude))
         self.vehicle.simple_takeoff(target_altitude)
-        self.home.alt = target_altitude  # This way home isn't 0 meters high when calling goto
 
         # Wait till target altitude reached
         while True:
@@ -73,10 +81,13 @@ class Controller:
             self.check_geofence(10, target_altitude + 10)
             if self.vehicle.location.global_relative_frame.alt >= target_altitude * 0.95:
                 self.logger.debug("Reached target altitude")
+                if self.__com:
+                    self.__com.send(u"Reached target altitude")
                 break
             elif self.vehicle.mode.name != "GUIDED":
                 # User took over control or geofence triggered
                 break
+        self.home.alt = target_altitude  # This way home isn't 0 meters high when calling goto
         return
 
     def log_flight_info(self, destination=None):
@@ -105,6 +116,8 @@ class Controller:
             self.logger.critical("Current Distance: {}".format(distance))
             if self.vehicle.mode.name == "GUIDED":
                 self.logger.critical("LANDING...")
+                if self.__com:
+                    self.__com.send(u"GEOFENCE DISTANCE EXCEEDED. LANDING...")
                 self.land()
         elif current.altitude > max_altitude:
             self.logger.critical("Exceeded altitude limit")
@@ -112,6 +125,8 @@ class Controller:
             self.logger.critical("Current Altitude: {}".format(current.altitude))
             if self.vehicle.mode.name == "GUIDED":
                 self.logger.critical("LANDING...")
+                if self.__com:
+                    self.__com.send(u"GEOFENCE ALTITUDE EXCEEDED. LANDING...")
                 self.land()
 
     def goto(self, point):
