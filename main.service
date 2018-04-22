@@ -1,0 +1,13 @@
+[Unit]
+Description=Main service file
+After=network.target setuart.service
+
+[Service]
+User=root
+Restart=no
+Type=simple
+WorkingDirectory=/home/debian/git/control
+ExecStart=/bin/sh -c '/usr/bin/python /home/debian/git/control/control/main.py 2>&1 | tee -a /home/debian/main.txt'
+
+[Install]
+WantedBy=multi-user.target
