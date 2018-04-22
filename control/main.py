@@ -4,6 +4,25 @@ Uses the ttyO4 connection (UART4) on the beaglebone to connect to a Pixhawk flig
 Uses the ttyO1 connection (UART1) to connect to a xBee wireless communication module.
 Uses tcp://localhost:5555 to connect to zmq server for reading i2c sensor data.
 Installing the appropriate main.service file allows for this to start on boot.
+
+The waypoints sent from the GCS will be a list of dictionaries in the form:
+    {"x" : <int>,       - positive east offset from start location in meters
+     "y" : <int>,       - positive north offset from start location in meters
+     "z" : <int>}       - altitude in meters
+
+Since the dronekit module was done in Python2 at the time this was written, this program
+must conform to Python2 syntax. However, the program running on the GCS is written in Python3
+and therefore expects the newer syntax. The most notable side effect from this is that all strings
+used by the communication module must be sent as unicode strings.
+
+The sensor data that the GCS expects will be a dictionary in the form:
+    {"x" : <int>,       - positive east offset from start location in meters
+     "y" : <int>,       - positive north offset from start location in meters
+     "z" : <int>,       - altitude in meters
+     "temp" : <float>,  - temperature in degrees Celsius
+     "lat"  : <float>,  - latitude
+     "lon"  : <float>,  - longitude
+     "time" : <float>}  - seconds since start of flight path
 """
 
 import logging
@@ -16,12 +35,24 @@ from control.i2cdataclient import I2cDataClient
 from control.gps import get_location_offset, get_distance, get_relative_from_location
 from control.helper import location_global_relative_to_gps_reading, gps_reading_to_location_global
 
-MAX_RADIUS = 50
-MAX_ALTITUDE = 20
+# Set max and min allowed distance for the UAV to travel from start location
+MAX_RADIUS = 250
+MAX_ALTITUDE = 50
 MIN_ALTITUDE = 3
 
 
 def create_waypoints(logger, com, start_location, waypoints):
+    """Returns a list of LocationGlobalRelative points to be sent to Pixhawk.
+    This function will also return None if any waypoint exceeds the max or min distances
+    defined at the top of main.py.
+
+    Args:
+        <Logger> logger                             - system logger
+        <Communication> com                         - xBee connection
+        <LocationGlobalRelative> start_location     - Location of Pixhawk at time of startup
+        <list> waypoints                            - {"x": <int>, "y": <int>, "z": <int>}
+                                                        distances from start location
+    """
     start_gps = location_global_relative_to_gps_reading(start_location)
     location_points = []
     for point in waypoints:
@@ -52,7 +83,15 @@ def create_waypoints(logger, com, start_location, waypoints):
     return location_points
 
 
-def package_data(home, location, data_client):
+def package_data(home, location, data_client, flight_time):
+    """Returns a dictionary of sensor data to be sent to the GCS.
+
+    Args:
+        <LocationGlobalRelative> home       - Location of Pixhawk at time of startup
+        <LocationGlobalRelative> location   - Location of Pixhawk at time of reading
+        <I2cDataClient> data_client         - i2c data client connection
+        <float> time                        - time since start of flight
+    """
     data = {}
     location_gps = location_global_relative_to_gps_reading(location)
     home_gps = location_global_relative_to_gps_reading(home)
@@ -64,7 +103,7 @@ def package_data(home, location, data_client):
     data[u'temp'] = float(i2c_data['temperature'])
     data[u'lat'] = location.lat
     data[u'lon'] = location.lon
-    data[u'time'] = time.time()
+    data[u'time'] = flight_time
     return data
 
 
@@ -115,6 +154,7 @@ def main():
     waypoints = com.receive()
     while not waypoints:
         waypoints = com.receive()
+        time.sleep(1)
 
     # Create points
     start_location = vehicle_control.vehicle.location.global_relative_frame
@@ -135,6 +175,7 @@ def main():
         logger.debug("Destination {}: {}".format(index, point))
 
     # Go to the points
+    flight_start_time = time.time()
     if vehicle_control.vehicle.mode.name == "GUIDED":
         logger.debug("Flying to points...")
         for point in points:
@@ -145,14 +186,14 @@ def main():
             vehicle_control.goto(point)
 
             # Wait for vehicle to reach destination before updating the point
-            for sleep_time in range(10):
+            for sleep_time in range(60):
                 if vehicle_control.vehicle.mode.name != "GUIDED":
                     com.send(u"Mode no longer guided")
                     break
                 vehicle_control.log_flight_info(point)
                 data_for_gcs = package_data(vehicle_control.home,
                                             vehicle_control.vehicle.location.global_relative_frame,
-                                            data_client)
+                                            data_client, time.time() - flight_start_time)
                 com.send(data_for_gcs)
                 # Don't let the vehicle go too far (could be stricter if get_distance
                 # improved and if gps was more accurate. Also note that altitude
@@ -177,9 +218,6 @@ def main():
     # Always keep the programming running and logging until the vehicle is disarmed
     while vehicle_control.vehicle.armed:
         vehicle_control.log_flight_info()
-        data_for_gcs = package_data(vehicle_control.home,
-                                    vehicle_control.vehicle.location.global_relative_frame,
-                                    data_client)
         time.sleep(1)
 
     # Program end
