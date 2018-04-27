@@ -90,7 +90,7 @@ def package_data(home, location, data_client, flight_time):
         <LocationGlobalRelative> home       - Location of Pixhawk at time of startup
         <LocationGlobalRelative> location   - Location of Pixhawk at time of reading
         <I2cDataClient> data_client         - i2c data client connection
-        <float> time                        - time since start of flight
+        <float> flight_time                 - time since start of flight
     """
     data = {}
     location_gps = location_global_relative_to_gps_reading(location)
