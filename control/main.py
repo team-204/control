@@ -90,7 +90,7 @@ def package_data(home, location, data_client, flight_time):
         <LocationGlobalRelative> home       - Location of Pixhawk at time of startup
         <LocationGlobalRelative> location   - Location of Pixhawk at time of reading
         <I2cDataClient> data_client         - i2c data client connection
-        <float> time                        - time since start of flight
+        <float> flight_time                 - time since start of flight
     """
     data = {}
     location_gps = location_global_relative_to_gps_reading(location)
@@ -105,6 +105,32 @@ def package_data(home, location, data_client, flight_time):
     data[u'lon'] = location.lon
     data[u'time'] = flight_time
     return data
+
+
+def is_destination_reached(logger, com, vehicle_control, destination):
+    """Returns True if the current altitude is within 3 meters of
+    target altitude and if the direct distance is within 2 meters of
+    target location. Otherwise returns False.
+
+    Args:
+        <Logger> logger                         - system logger
+        <Communication> com                     - xBee connection
+        <Controller> vehicle_control            - controller object
+        <LocationGlobalRelative> destination    - destination point
+    """
+
+    current = vehicle_control.vehicle.location.global_relative_frame
+    current_reading = location_global_relative_to_gps_reading(current)
+    point_reading = location_global_relative_to_gps_reading(destination)
+    current_altitude = current_reading.altitude
+    target_altitude = point_reading.altitude
+    distance = get_distance(current_reading, point_reading)
+    if distance < 2 and abs(current_altitude - target_altitude) < 3:
+        logger.debug('Destination Reached')
+        com.send(u"Destination Reached")
+        time.sleep(3)
+        return True
+    return False
 
 
 def main():
@@ -200,14 +226,7 @@ def main():
                 # is looser here to avoid false landings (since gps altitude not
                 # accurate at all).
                 vehicle_control.check_geofence(MAX_RADIUS+10, MAX_ALTITUDE+10)
-                current = vehicle_control.vehicle.location.global_relative_frame
-                current_reading = location_global_relative_to_gps_reading(current)
-                point_reading = location_global_relative_to_gps_reading(point)
-                distance = get_distance(current_reading, point_reading)
-                if distance < 1:
-                    logger.debug('Destination Reached')
-                    com.send(u"Destination Reached")
-                    time.sleep(5)
+                if is_destination_reached(logger, com, vehicle_control, point):
                     break
                 time.sleep(1)
 

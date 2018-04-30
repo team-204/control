@@ -28,16 +28,16 @@ class Controller:
             self.logger.debug('Attempting connection to %s at baud %s',
                               connection_string, baud)
             if self.__com:
-                self.__com.send(u"Attempting connection to %s at baud %s",
-                                connection_string, baud)
+                self.__com.send(u"Attempting connection to {} at baud {}".format(
+                                connection_string, baud))
             self.vehicle = dronekit.connect(self.connection_string,
                                             wait_ready=True, baud=baud)
         else:
             self.logger.debug('Attempting connection to %s',
                               connection_string)
             if self.__com:
-                self.__com.send(u"Attempting connection to %s",
-                                connection_string)
+                self.__com.send(u"Attempting connection to {}".format(
+                                connection_string))
             self.vehicle = dronekit.connect(self.connection_string,
                                             wait_ready=True)
         self.logger.debug('Connected.')
@@ -81,10 +81,12 @@ class Controller:
         if self.__com:
             self.__com.send(u"Attempting simple takeoff to {} m...".format(target_altitude))
         self.vehicle.simple_takeoff(target_altitude)
+        start_takeoff_time = time.time()
 
         # Wait till target altitude reached
         while True:
             time.sleep(3)
+            time_since_takeoff = time.time() - start_takeoff_time
             self.log_flight_info()
             self.check_geofence(10, target_altitude + 10)
             if self.vehicle.location.global_relative_frame.alt >= target_altitude * 0.95:
@@ -92,7 +94,15 @@ class Controller:
                 if self.__com:
                     self.__com.send(u"Reached target altitude")
                 break
+            elif time_since_takeoff > 30:
+                self.logger.debug("Time limit reached for takeoff. Takeoff finished")
+                if self.__com:
+                    self.__com.send(u"Time limit reach for takeoff. Takeoff finished")
+                break
             elif self.vehicle.mode.name != "GUIDED":
+                self.logger.debug("No longer guided. Autopilot did not reach target altitude.")
+                if self.__com:
+                    self.__com.send(u"No longer guided. Autopilot did not reach target altitude.")
                 # User took over control or geofence triggered
                 break
         self.home.alt = target_altitude  # This way home isn't 0 meters high when calling goto
